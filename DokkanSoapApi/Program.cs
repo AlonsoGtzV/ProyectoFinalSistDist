@@ -24,3 +24,4 @@ var app = builder.Build();
 app.UseSoapEndpoint<DokkanContract>("/DokkanService.svc", new SoapEncoderOptions());
 
 app.Run();
+
