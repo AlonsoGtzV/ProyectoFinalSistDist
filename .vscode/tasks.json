@@ -80,7 +80,10 @@
             "dependsOn": [
                 "docker-build: debug"
             ],
-            "dockerRun": {},
+            "dockerRun": {
+                "env":{"ConnectionStrings__DefaultConnection":"Server=host.docker.internal;Database=DistributedSystems;User Id=sa;Password=TulaArg2109;Trust Server Certificate=True;"},
+                "ports": [{"hostPort": 8085, "containerPort": 8085}]
+            },
             "netCore": {
                 "appProject": "${workspaceFolder}/DokkanSoapApi/DokkanSoapApi.csproj",
                 "enableDebugging": true
