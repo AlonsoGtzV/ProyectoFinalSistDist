@@ -1,5 +1,22 @@
 {
+  "name": "pettan",
+  "version": "1.0.0",
+  "description": "DokkanAPI Soap y Rest ful",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "Edwin Antonio Quintero Velazquez",
+  "license": "ISC",
   "dependencies": {
-    "axios": "^1.7.8"
+    "body-parser": "^1.20.3",
+    "express": "^4.21.1",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.1",
+    "redis": "^4.7.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "axios": "^1.7.8",
+    "xml2js": "^0.6.2"
   }
 }
