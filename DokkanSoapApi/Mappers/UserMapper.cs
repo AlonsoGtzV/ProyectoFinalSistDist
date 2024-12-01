@@ -5,7 +5,7 @@ using DokkanSoapApi.Models;
 namespace DokkanSoapApi.Mappers;
 
 public static class UserMapper{
-    public static UserModel ToModel(this UserEntity user){
+    public static UserModel? ToModel(this UserEntity user){
         if(user is null){
             return null;
         }
