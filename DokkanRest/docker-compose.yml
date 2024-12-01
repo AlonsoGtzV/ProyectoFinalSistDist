@@ -19,10 +19,10 @@ services:
     ports:
       - 6379:6379
 
-        # Servicio de la API REST (DokkanApi)
+  # Servicio de la API REST (DokkanApi)
   rest-api:
     build:
-      context: ./rest
+      context: ./DokkanRest
     ports:
       - "3000:3000"
     depends_on:
@@ -32,9 +32,9 @@ services:
   # Servicio de la API SOAP (Usuarios)
   soap-api:
     build:
-      context: ./soap
+      context: ./DokkanSoapApi
     ports:
-      - "4000:4000" 
+      - "8085:8085" 
     restart: always
     environment:
       FLASK_ENV: development

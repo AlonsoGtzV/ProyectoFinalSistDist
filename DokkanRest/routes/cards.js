@@ -1,5 +1,6 @@
 const express = require('express')
 const axios = require('axios');
+const { parseStringPromise } = require('xml2js');
 const cards = express.Router()
 const Pettan = require('../schema/pettan')
 
@@ -23,9 +24,12 @@ redisClient.connect()
  *         nombre:
  *           type: string
  *           description: Nombre del usuario.
- *         Lv:
+ *         level:
  *           type: integer
  *           description: Lv del usuario.
+ *         powerlevel:
+ *           type: integer
+ *           description: PowerLevel del usuario.
  *         pettanId:
  *           type: string
  *           description: ID de la carta Pettan que tiene el usuario.
@@ -34,7 +38,7 @@ redisClient.connect()
  *       properties:
  *         user_id:
  *           type: number
- *           description: ID del entrenador que posee el Pokémon. 
+ *           description: ID del usuario que posee la carta Pettan. 
  *         id:
  *           type: number
  *           description: ID único de la carta Pettan.
@@ -207,26 +211,53 @@ cards.get('/:id', async (req, res) => {
         if (!pettan) {
             return res.status(404).json({ error: 'Card not found' }); 
         }
-    // Si el Pettan tiene un user_id, hacemos la solicitud a la API SOAP
-    if (pettan.user_id) {
-        try {
-            // Realizar una solicitud HTTP a la API SOAP para obtener el entrenador
-            const response = await axios.get(`http://soap-api:4000/users/${pettan.user_id_id}`);
-            
-            // Añadir los datos del usuario al Pettan 
-            pettan.user = response.data; 
-        } catch (error) {
-            console.error('Error al obtener el Usuario:', error.message);
-            pettan.user = null; // Si ocurre un error, asignamos null al atributo usuario
-        }
-    }
+    const soapRequest = `
+      <?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:soap="http://schemas.datacontract.org/2004/07/DokkanSoapApi.Dtos">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <tem:CreateUser>
+            <tem:user>
+                <!--Optional:-->
+                <soap:level>12</soap:level>
+                <soap:powerLevel>1312</soap:powerLevel>
+                <soap:username>Goku</soap:username>
+            </tem:user>
+        </tem:CreateUser>
+    </soapenv:Body>
+</soapenv:Envelope>
+    `;
 
-    // Devolver la información de la carta Pettan junto con el Usuario
-    res.json(pettan);
-    } catch (error) {
-        console.error('Error al obtener la carta Pettan:', error.message);
+    const response = await axios.post(
+        'http://localhost:8085/DokkanService.svc', // URL de tu API SOAP
+        soapRequest,
+        {
+            headers: {
+                'Content-Type': 'text/xml; charset=utf-8',
+            },
+        }
+    );
+
+    const xmlResponse = response.data;
+        console.log('Respuesta XML:', xmlResponse);
+
+        const parsedData = await parseStringPromise(xmlResponse, {
+            explicitArray: false, // Simplifica el acceso eliminando arrays innecesarios
+            tagNameProcessors: [(name) => name.replace(/.*:/, '')], // Remueve los prefijos de las etiquetas
+        });
+
+        const userData = parsedData.Envelope.Body.GetUserResponse.GetUserResult;
+
+        const combinedResult = {
+            pettan,
+            user: userData,
+        };
+        res.json(combinedResult);
+         } catch (error) {
+        console.error('Error en la conexion con la Api:', error.message);
         res.status(500).json({ error: 'Server error' });
     }
+
 });
 
 

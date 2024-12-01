@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'DokkanApi',
+      title: 'DokkanApi Rest y Soap',
       version: '1.0.0',
-      description: 'Dokkan Api RestFul',
+      description: 'Una Api de DOKKAN hecha en Soap y Rest',
     },
     servers: [
       {
