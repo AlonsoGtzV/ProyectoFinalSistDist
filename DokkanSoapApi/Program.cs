@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Registrar el DbContext
 builder.Services.AddDbContext<RelationalDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
 // Registrar los servicios
 builder.Services.AddEndpointsApiExplorer();
