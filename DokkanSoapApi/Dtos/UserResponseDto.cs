@@ -7,9 +7,9 @@ public class UserResponseDto{
     [DataMember]
     public Guid Id {get; set;}
     [DataMember]
-    public string username {get; set;} = null;
+    public string username {get; set;} = null!;
     [DataMember]
-    public int level {get; set;}
+    public string level {get; set;} =null!;
     [DataMember]
-    public int powerLevel {get; set;}
+    public string powerLevel {get; set;} =null!;
 }

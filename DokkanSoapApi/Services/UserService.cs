@@ -16,7 +16,9 @@ public class UserService : DokkanContract{
     public async Task<UserResponseDto> CreateUser(UserCreateRequestDto userRequest, CancellationToken cancellationToken)
     {
         var user = userRequest.ToModel();
+        Console.WriteLine($"Username: {user.username}, Level: {user.level}, PowerLevel: {user.powerLevel}");
         var createdUser = await _userRepository.CreateAsync(user, cancellationToken);
+
         return createdUser.ToDto();
     }
 
