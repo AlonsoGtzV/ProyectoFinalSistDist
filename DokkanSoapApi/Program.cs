@@ -20,6 +20,12 @@ builder.Services.AddScoped<DokkanContract, UserService>();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 // ENDPOINTS
 app.UseSoapEndpoint<DokkanContract>("/DokkanService.svc", new SoapEncoderOptions());
 
