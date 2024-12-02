@@ -1,6 +1,0 @@
-@DokkanSoapApi_HostAddress = http://localhost:5027
-
-GET {{DokkanSoapApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
