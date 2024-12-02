@@ -1,0 +1,107 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://example.org/user"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             targetNamespace="http://example.org/user"
+             name="UserService">
+
+
+  <types>
+    <xsd:schema targetNamespace="http://example.org/user">
+      
+      <xsd:element name="GetUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="GetUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:int"/>
+            <xsd:element name="username" type="xsd:string"/>
+            <xsd:element name="level" type="xsd:int"/>
+            <xsd:element name="powerlevel" type="xsd:int"/>
+            <xsd:element name="cardId" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      
+
+      <xsd:element name="PostUserRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="id" type="xsd:int"/>
+            <xsd:element name="username" type="xsd:string"/>
+            <xsd:element name="level" type="xsd:int"/>
+            <xsd:element name="powerlevel" type="xsd:int"/>
+            <xsd:element name="cardId" type="xsd:string" minOccurs="0"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="PostUserResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="message" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+
+  <message name="GetUserRequest">
+    <part name="parameters" element="tns:GetUserRequest"/>
+  </message>
+  <message name="GetUserResponse">
+    <part name="parameters" element="tns:GetUserResponse"/>
+  </message>
+
+  <message name="PostUserRequest">
+    <part name="parameters" element="tns:PostUserRequest"/>
+  </message>
+  <message name="PostUserResponse">
+    <part name="parameters" element="tns:PostUserResponse"/>
+  </message>
+
+
+  <portType name="UserPortType">
+    <operation name="GetUser">
+      <input message="tns:GetUserRequest"/>
+      <output message="tns:GetUserResponse"/>
+    </operation>
+    <operation name="PostUser">
+      <input message="tns:PostUserRequest"/>
+      <output message="tns:PostUserResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="UserBinding" type="tns:UserPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetUser">
+      <soap:operation soapAction="GetUser"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="PostUser">
+      <soap:operation soapAction="PostUser"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="UserService">
+    <port name="UserPort" binding="tns:UserBinding">
+      <soap:address location="http://localhost:5000/soap"/>
+    </port>
+  </service>
+</definitions>

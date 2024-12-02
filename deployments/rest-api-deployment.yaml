@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api
+  namespace: agv-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rest-api
+  template:
+    metadata:
+      labels:
+        app: rest-api
+    spec:
+      containers:
+        - name: rest-api
+          image: localhost:5000/dokkan-rest-api:12
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo-service.odm-database.svc.cluster.local:27017
+            - name: SOAP_API_URL
+              value: http://soap-api.jclo-api.svc.cluster.local:5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-api-service
+  namespace: agv-api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: rest-api

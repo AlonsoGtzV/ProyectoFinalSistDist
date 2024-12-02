@@ -4,12 +4,6 @@ const { parseStringPromise } = require('xml2js');
 const cards = express.Router()
 const Pettan = require('../schema/pettan')
 
-const redisClient = require('redis').createClient({
-    url: 'redis://redis:6379'
-})
-redisClient.connect()
-
-
 
 /**
  * @swagger
@@ -211,25 +205,22 @@ cards.get('/:id', async (req, res) => {
         if (!pettan) {
             return res.status(404).json({ error: 'Card not found' }); 
         }
-    const soapRequest = `
-      <?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:soap="http://schemas.datacontract.org/2004/07/DokkanSoapApi.Dtos">
-    <soapenv:Header/>
-    <soapenv:Body>
-        <tem:CreateUser>
-            <tem:user>
-                <!--Optional:-->
-                <soap:level>12</soap:level>
-                <soap:powerLevel>1312</soap:powerLevel>
-                <soap:username>Goku</soap:username>
-            </tem:user>
-        </tem:CreateUser>
-    </soapenv:Body>
-</soapenv:Envelope>
+
+        const userId = pettan.user_id;
+
+        const soapRequest = `
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="user.soap.api">
+            <soapenv:Header/>
+            <soapenv:Body>
+                <tns:GetUser>
+                    <tns:id>${userId}</tns:id>
+                </tns:GetUser>
+            </soapenv:Body>
+        </soapenv:Envelope>
     `;
 
     const response = await axios.post(
-        'http://localhost:8085/DokkanService.svc', // URL de tu API SOAP
+        'http://soap-api:5000/soap', 
         soapRequest,
         {
             headers: {
@@ -242,8 +233,8 @@ cards.get('/:id', async (req, res) => {
         console.log('Respuesta XML:', xmlResponse);
 
         const parsedData = await parseStringPromise(xmlResponse, {
-            explicitArray: false, // Simplifica el acceso eliminando arrays innecesarios
-            tagNameProcessors: [(name) => name.replace(/.*:/, '')], // Remueve los prefijos de las etiquetas
+            explicitArray: false, 
+            tagNameProcessors: [(name) => name.replace(/.*:/, '')], 
         });
 
         const userData = parsedData.Envelope.Body.GetUserResponse.GetUserResult;
@@ -371,6 +362,107 @@ cards.post('/', async (req, res) => {
         res.json({ success: true, pettan }); 
     } catch (error) {
         res.status(500).send(error.message);
+    }
+});
+
+/**
+ * @swagger
+ * /cards/user:
+ *   post:
+ *     summary: Crear un nuevo user.
+ *     description: Crea un user en la soap.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: El username del user.
+ *                 example: 
+ *               level:
+ *                 type: integer
+ *                 description: El nivel del user.
+ *                 example: 777
+ *               Powerlevel:
+ *                 type: integer
+ *                 description: El nivel de poder dell user.
+ *                 example: 100000000
+ *               card_id:
+ *                 type: string
+ *                 description: ID de la carta asociada al user (opcional).
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: User creado exitosamente.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User created successfully.
+ *                 user:
+ *                   type: object
+ *                   description: Usuario creado.
+ *       400:
+ *         description: Solicitud inválida (Revisa los campos que esten llenados correctamente).
+ *       500:
+ *         description: Error interno del servidor.
+ */
+
+
+cards.post('/user', async (req, res) => {
+    const { username, level, powerlevel, card_id } = req.body;
+
+    if (!username || !level) {
+        return res.status(400).json({ error: 'Llena los campo correctamente' });
+    }
+
+    try {
+        // Construir la solicitud SOAP para crear un usuario
+        const soapRequest = `
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="user.soap.api">
+                <soapenv:Header/>
+                <soapenv:Body>
+                    <tns:PostUser>
+                        <tns:username>${username}</tns:username>
+                        <tns:level>${level}</tns:level>
+                        <tns:card_id>${card_id || ''}</tns:card_id>
+                    </tns:PostUser>
+                </soapenv:Body>
+            </soapenv:Envelope>
+        `;
+
+
+        const response = await axios.post(
+            'http://soap-api:5000/soap', 
+            soapRequest,
+            {
+                headers: {
+                    'Content-Type': 'text/xml; charset=utf-8',
+                },
+            }
+        );
+
+        const xmlResponse = response.data;
+        console.log('Respuesta XML:', xmlResponse);
+
+        const parsedData = await parseStringPromise(xmlResponse, {
+            explicitArray: false, 
+            tagNameProcessors: [(name) => name.replace(/.*:/, '')], 
+        });
+
+        const userResult = parsedData.Envelope.Body.PostUserResponse.PostUserResult;
+
+        // Devolver la respuesta procesada al cliente
+        res.status(201).json({ message: 'User creado exitosamente', user: userResult });
+    } catch (error) {
+        console.error('Error con la DokkanSoap:', error.message);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

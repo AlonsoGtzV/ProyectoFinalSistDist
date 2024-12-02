@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: soap-api
+  namespace: agv-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: soap-api
+  template:
+    metadata:
+      labels:
+        app: soap-api
+    spec:
+      containers:
+        - name: soap-api
+          image: localhost:5000/dokkan-api:12
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MYSQL_HOST
+              value: mysql-service.hga-database.svc.cluster.local
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASSWORD
+              value: admin
+            - name: MYSQL_DATABASE
+              value: users
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: soap-api-service
+  namespace: agv-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: soap-api
