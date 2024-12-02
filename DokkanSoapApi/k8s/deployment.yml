@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dokkan-soap-api
+  namespace: agv-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dokkan-soap-api
+  template:
+    metadata:
+      labels:
+        app: dokkan-soap-api
+    spec:
+      containers:
+        - name: proyectofinalsistdist-dev
+          image: localhost:5000/proyectofinalsistdist:dev
+          env: 
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: dokkan-soap-api-secrets
+                  key: connection-string
+          ports:
+            - containerPort: 5000
